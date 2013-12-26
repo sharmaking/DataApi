@@ -12,7 +12,7 @@ def main():
 	ApiInstance.connectServer()
 
 	ApiInstance.subscibeStock(subStock)
-	ApiInstance.requestData(0,0,datetime.datetime(2012,1,1,0,0,0),datetime.datetime(2012,01,1,0,0,0))
+	ApiInstance.requestData(0,1,datetime.datetime(2012,1,1,0,0,0),datetime.datetime(2012,01,1,0,0,0))
 	pass
 
 if __name__ == '__main__':

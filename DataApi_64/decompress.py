@@ -6,7 +6,7 @@ import copy
 import ctypes
 import datetime
 
-api = ctypes.windll.LoadLibrary("./DataApi_64/decompress.dll")
+api = ctypes.windll.LoadLibrary("./DataApi_64/decompress64.dll")
 #解压逐笔成交数据
 def DecompressTransactionData(p, nItems):
 	pTransactions = dataStruct.getTransactions(nItems)

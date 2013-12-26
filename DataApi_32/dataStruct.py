@@ -3,6 +3,7 @@
 # dataStruct.py
 #逐笔成交
 import numpy as np
+import datetime
 import copy
 #-----------------------------
 #标准解压结构体
@@ -61,12 +62,12 @@ MarketDataForTrade = {
 	"iTurnover" : np.int64(0),		#成交总金额
 	"nTotalBidVol" : np.int64(0),	#委托买入总量
 	"nTotalAskVol" : np.int64(0),	#委托卖出总量
-	"nWeightedAvgBidPrice" : 0,
-	"nWeightedAvgAskPrice" : 0,
-	"nIOPV" : 0,
-	"nYieldToMaturity" : 0,
-	"nHighLimited" : 0,
-	"nLowLimited" : 0,
+	"nWeightedAvgBidPrice" : 0,		#加权平均委买价格
+	"nWeightedAvgAskPrice" : 0,		#加权平均委卖价格
+	"nIOPV" : 0,					#IOPV净值估值
+	"nYieldToMaturity" : 0,			#到期收益率
+	"nHighLimited" : 0,				#涨停价
+	"nLowLimited" : 0,				#跌停价
 	"chPrefix" : 0
 }
 #期货行情数据
@@ -167,23 +168,63 @@ def getIndexMarketData():
 #转换股票行情数据
 def formarStockMarketData(pMarketDataForTrade, chSymbol):
 	pStandard = copy.copy(StandardMarketData)
-	pStandard[""]
 	pStandard["stockCode"]	= pMarketDataForTrade["chSecurityCode"]		#合约代码、股票代码、指数代码
 	pStandard["stockName"]	= chSymbol									#合约名称、股票名称
-	#pStandard["dateTime"]	: ("%s %s" %(pMarketDataForTrade["nDate"].isoformat(), pMarketDataForTrade["nTime"].isoformat()))
-	#pStandard["open"]		: 0,				#开盘价
-	#pStandard["high"]		: 0,				#最高价
-	#pStandard["low"]		: 0,				#最低价
-	#pStandard["close"]		: 0,				#收盘价，最新价
-	#pStandard["vol"]		: 0,				#成交量
-	#pStandard["askPrice"]	: [0]*10,			#申卖价
-	#pStandard["askVol"]	: [0]*10,			#申卖量
-	#pStandard["bidPrice"]	: [0]*10,			#申买价
-	#pStandard["bidVol"]	: [0]*10,			#申买量
-	#pStandard["preClose"]	: 0,				#昨收
-	#pStandard["highLimited"] : 0,				#涨停价
-	#pStandard["lowLimited"] : 0,				#跌停价
-	#pStandard["dOpen"]		: 0,				#今日开盘
-	#pStandard["dHigh"]		: 0,				#今日最高
-	#pStandard["dLow"]		: 0 				#今日最低
-	pass
+	dateTimeStr = "%s %s" %(str(pMarketDataForTrade["nDate"]), pMarketDataForTrade["nTime"].strftime("%H:%M:%S.%f"))
+	pStandard["dateTime"]	= datetime.datetime.strptime(dateTimeStr,"%Y-%m-%d %H:%M:%S.%f")
+	pStandard["open"]		= pMarketDataForTrade["nMatch"]				#开盘价
+	pStandard["high"]		= pMarketDataForTrade["nMatch"]				#最高价
+	pStandard["low"]		= pMarketDataForTrade["nMatch"]				#最低价
+	pStandard["close"]		= pMarketDataForTrade["nMatch"]				#收盘价，最新价
+	pStandard["vol"]		= pMarketDataForTrade["iVolume"]			#成交总量
+	pStandard["askPrice"]	= pMarketDataForTrade["nAskPrice"]			#申卖价
+	pStandard["askVol"]		= pMarketDataForTrade["nAskVol"]			#申卖量
+	pStandard["bidPrice"]	= pMarketDataForTrade["nBidPrice"]			#申买价
+	pStandard["bidVol"]		= pMarketDataForTrade["nBidVol"]			#申买量
+	pStandard["preClose"]	= pMarketDataForTrade["nPreClose"]			#昨收
+	pStandard["highLimited"] = pMarketDataForTrade["nHighLimited"]		#涨停价
+	pStandard["lowLimited"] = pMarketDataForTrade["nLowLimited"]		#跌停价
+	pStandard["dOpen"]		= pMarketDataForTrade["nOpen"]				#今日开盘
+	pStandard["dHigh"]		= pMarketDataForTrade["nHigh"]				#今日最高
+	pStandard["dLow"]		= pMarketDataForTrade["nLow"]				#今日最低
+	return pStandard
+#转换期货行情数据
+def formarFutureMarketData(pFutureMarketData, chSymbol):
+	pStandard = copy.copy(StandardMarketData)
+	pStandard["stockCode"]	= pFutureMarketData["chSecurityCode"]		#合约代码、股票代码、指数代码
+	pStandard["stockName"]	= chSymbol									#合约名称、股票名称
+	dateTimeStr = "%s %s" %(str(pFutureMarketData["nDate"]), pFutureMarketData["nTime"].strftime("%H:%M:%S.%f"))
+	pStandard["dateTime"]	= datetime.datetime.strptime(dateTimeStr,"%Y-%m-%d %H:%M:%S.%f")
+	pStandard["open"]		= pFutureMarketData["nMatch"]				#开盘价
+	pStandard["high"]		= pFutureMarketData["nMatch"]				#最高价
+	pStandard["low"]		= pFutureMarketData["nMatch"]				#最低价
+	pStandard["close"]		= pFutureMarketData["nMatch"]				#收盘价，最新价
+	pStandard["vol"]		= pFutureMarketData["iVolume"]				#成交总量
+	pStandard["askPrice"]	= pFutureMarketData["nAskPrice"]			#申卖价
+	pStandard["askVol"]		= pFutureMarketData["nAskVol"]				#申卖量
+	pStandard["bidPrice"]	= pFutureMarketData["nBidPrice"]			#申买价
+	pStandard["bidVol"]		= pFutureMarketData["nBidVol"]				#申买量
+	pStandard["preClose"]	= pFutureMarketData["nPreClose"]			#昨收
+	pStandard["highLimited"] = pFutureMarketData["nHighLimited"]		#涨停价
+	pStandard["lowLimited"] = pFutureMarketData["nLowLimited"]			#跌停价
+	pStandard["dOpen"]		= pFutureMarketData["nOpen"]				#今日开盘
+	pStandard["dHigh"]		= pFutureMarketData["nHigh"]				#今日最高
+	pStandard["dLow"]		= pFutureMarketData["nLow"]					#今日最低
+	return pStandard
+#转换指数行情数据
+def formarIndexMarketData(pIndexMarketData, chSymbol):
+	pStandard = copy.copy(StandardMarketData)
+	pStandard["stockCode"]	= pIndexMarketData["chSecurityCode"]		#合约代码、股票代码、指数代码
+	pStandard["stockName"]	= chSymbol									#合约名称、股票名称
+	dateTimeStr = "%s %s" %(str(pIndexMarketData["nDate"]), pIndexMarketData["nTime"].strftime("%H:%M:%S.%f"))
+	pStandard["dateTime"]	= datetime.datetime.strptime(dateTimeStr,"%Y-%m-%d %H:%M:%S.%f")
+	pStandard["open"]		= pIndexMarketData["nLastIndex"]			#开盘价
+	pStandard["high"]		= pIndexMarketData["nLastIndex"]			#最高价
+	pStandard["low"]		= pIndexMarketData["nLastIndex"]			#最低价
+	pStandard["close"]		= pIndexMarketData["nLastIndex"]			#收盘价，最新价
+	pStandard["vol"]		= pIndexMarketData["iTotalVolume"]			#成交总量
+	pStandard["preClose"]	= pIndexMarketData["nPreCloseIndex"]		#昨收
+	pStandard["dOpen"]		= pIndexMarketData["nOpenIndex"]			#今日开盘
+	pStandard["dHigh"]		= pIndexMarketData["nHighIndex"]			#今日最高
+	pStandard["dLow"]		= pIndexMarketData["nLowIndex"]				#今日最低
+	return pStandard

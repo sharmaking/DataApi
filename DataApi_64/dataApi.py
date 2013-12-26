@@ -8,7 +8,6 @@ class CDataApi(socket.socket):
 	def __init__(self, HOST, PORT):
 		super(CDataApi, self).__init__(socket.AF_INET, socket.SOCK_STREAM)
 		self.ADDR = (HOST, PORT)
-		self.init()
 	#链接服务器
 	def connectServer(self):
 		self.connect(self.ADDR)
@@ -36,7 +35,5 @@ class CDataApi(socket.socket):
 		pass
 	#数据接收接口
 	def onRtnDepthMarketData(self, dataType, data):
-		if dataType == 5:
-			print dataType, data
-			print "----------------"
-		pass
+		print dataType, data
+		print "----------------"

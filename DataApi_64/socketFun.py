@@ -61,8 +61,8 @@ def requestSomeTimes(socketLink, date1, date2):
 	fmt = "iiii"
 	sn = 3
 	length = 8
-	date1 = int(date.strftime("%Y%m%d"))     #10点23分23秒
-	date2 = int(date.strftime("%Y%m%d"))
+	date1 = int(date1.strftime("%Y%m%d"))     #10点23分23秒
+	date2 = int(date2.strftime("%Y%m%d"))
 	bytes = struct.pack(fmt, sn, length, date1, date2)
 	#发送订阅代码
 	socketLink.send(bytes)

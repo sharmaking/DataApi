@@ -35,5 +35,4 @@ class CDataApi(socket.socket):
 		pass
 	#数据接收接口
 	def onRtnDepthMarketData(self, dataType, data):
-		print dataType, data
-		print "----------------"
+		pass

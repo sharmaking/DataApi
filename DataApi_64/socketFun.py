@@ -19,14 +19,18 @@ g_socketLink = 0 	#设置socket接口
 #发送订阅请求
 #--------------------------------
 #向服务端发送订阅股票 step-1
-def subscibeStock(socketLink, stocks):
-	fmt = "iii%ds" %(6*len(stocks))
+def subscibeStock(socketLink, isAllMarket, stocks):
+	if isAllMarket:
+		isAllMarket = 1
+	else:
+		isAllMarket = 0
+	fmt = "iiii%ds" %(6*len(stocks))
 	sn = 0
-	length = 6*len(stocks) + 4
+	length = 6*len(stocks) + 8
 	stocksStr = ""
 	for stock in stocks:
 		stocksStr = stocksStr + stock
-	bytes = struct.pack(fmt, sn, length, len(stocks), stocksStr)
+	bytes = struct.pack(fmt, sn, length, isAllMarket, len(stocks), stocksStr)
 	#发送订阅代码
 	socketLink.send(bytes)
 	global g_socketLink
@@ -101,7 +105,8 @@ def resolveTradeSettlement(bufferData):
 	for pTransaction in pTransactions:
 		pTransaction["chSecurityCode"] = g_stocks[str(nIdnum)]["chSecurityCode"]
 		pTransaction["nDate"] = g_currentDate
-	g_socketLink.onRtnDepthMarketData(1, pTransactions)
+		pTransaction = dataStruct.formatTransaction(pTransaction, g_stocks[str(nIdnum)]["chSymbol"])
+		g_socketLink.onRtnDepthMarketData(1, pTransaction)
 #解析成交队列
 def resolveOrderQueue(bufferData):
 	p = bufferData[8:]
@@ -111,7 +116,8 @@ def resolveOrderQueue(bufferData):
 	for i in xrange(nItems):
 		pQueues[i]["chSecurityCode"] = g_stocks[str(pIdnums[i])]["chSecurityCode"]
 		pQueues[i]["nDate"] = g_currentDate
-	g_socketLink.onRtnDepthMarketData(2, pQueues)
+		pQueue = dataStruct.formatOrderQueue(pQueues[i], g_stocks[str(pIdnums[i])]["chSymbol"])
+		g_socketLink.onRtnDepthMarketData(2, pQueue)
 #解析股票行情数据
 def resolveMarketData(bufferData):
 	p = bufferData[8:]
@@ -123,7 +129,7 @@ def resolveMarketData(bufferData):
 		nSize = nSize + nLength
 		pMarketData["chSecurityCode"] = g_stocks[str(pIdnum)]["chSecurityCode"]
 		pMarketData["nDate"] = g_currentDate
-		pMarketData = dataStruct.formarStockMarketData(pMarketData, g_stocks[str(pIdnum)]["chSymbol"])
+		pMarketData = dataStruct.formatStockMarketData(pMarketData, g_stocks[str(pIdnum)]["chSymbol"])
 		g_socketLink.onRtnDepthMarketData(3, pMarketData)
 #解析期货行情数据
 def resolveFutureMarketData(bufferData):
@@ -136,7 +142,7 @@ def resolveFutureMarketData(bufferData):
 		nSize = nSize + nLength
 		pMarketData["chSecurityCode"] = g_stocks[str(pMarketData["nIndex"])]["chSecurityCode"]
 		pMarketData["nDate"] = g_currentDate
-		pMarketData = dataStruct.formarFutureMarketData(pMarketData, g_stocks[str(pMarketData["nIndex"])]["chSymbol"])
+		pMarketData = dataStruct.formatFutureMarketData(pMarketData, g_stocks[str(pMarketData["nIndex"])]["chSymbol"])
 		g_socketLink.onRtnDepthMarketData(4, pMarketData)
 #解析指数数据
 def resolveIndexMarketData(bufferData):
@@ -149,7 +155,7 @@ def resolveIndexMarketData(bufferData):
 		nSize = nSize + nLength
 		pMarketData["chSecurityCode"] = g_stocks[str(pMarketData["nIndex"])]["chSecurityCode"]
 		pMarketData["nDate"] = g_currentDate
-		pMarketData = dataStruct.formarIndexMarketData(pMarketData, g_stocks[str(pMarketData["nIndex"])]["chSymbol"])
+		pMarketData = dataStruct.formatIndexMarketData(pMarketData, g_stocks[str(pMarketData["nIndex"])]["chSymbol"])
 		g_socketLink.onRtnDepthMarketData(5, pMarketData)
 #解析接收的数据类型调用相应的方法
 def resolveRecvData(bufferData):
@@ -176,6 +182,13 @@ def resolveRecvData(bufferData):
 	#解析指数数据
 	elif dataType == 5:
 		resolveIndexMarketData(bufferData)
+	#解析历史数据
+	elif dataType == 6:
+		#print bufferData[8:]
+		pass
+	#结束标记
+	elif dataType == 998:
+		pass
 #--------------------------------
 #接收解析socket数据，缓存拼接成完整数据
 #--------------------------------
@@ -201,7 +214,7 @@ def handleBufferData(bufferData):
 		pass
 	return tempBufferData
 #监听socket缓存
-def recvSubscibeRespond(socketLink):
+def recvSubscibeRespond(socketLink, num):
 	bufferData = ""
 	while 1:
 		recvData = socketLink.recv(BUFSIZ)

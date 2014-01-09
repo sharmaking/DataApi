@@ -136,6 +136,24 @@ StandardMarketData = {
 	"dHigh"		: 0,				#今日最高
 	"dLow"		: 0 				#今日最低
 }
+StandardTransaction = {
+	"stockCode" : "000000",			#合约代码、股票代码、指数代码
+	"stockName"	: "",				#合约名称、股票名称
+	"dateTime"	: 0,				#行情数据时间, dateime.datetime对象
+	"index" : 0,					#成交编号
+	"price" : 0,					#成交价格
+	"vol" : 0						#成交数量
+}
+StandardOrderQueue = {
+	"stockCode" : "000000",			#合约代码、股票代码、指数代码
+	"stockName"	: "",				#合约名称、股票名称
+	"dateTime"	: 0,				#行情数据时间, dateime.datetime对象
+	"side" : 0,						#买卖方向（B：bid，S：Ask）
+	"price" : 0,					#成交价格
+	"orders" : 0,					#订单数量
+	"ABItems" : 0,					#明细个数
+	"ABVolume" : []					#订单明细
+}
 #-----------------------------
 #获取解压结构体函数
 #-----------------------------
@@ -166,7 +184,7 @@ def getIndexMarketData():
 #将解压的数据结构体转换成标准的数据结构
 #-----------------------------
 #转换股票行情数据
-def formarStockMarketData(pMarketDataForTrade, chSymbol):
+def formatStockMarketData(pMarketDataForTrade, chSymbol):
 	pStandard = copy.copy(StandardMarketData)
 	pStandard["stockCode"]	= pMarketDataForTrade["chSecurityCode"]		#合约代码、股票代码、指数代码
 	pStandard["stockName"]	= chSymbol									#合约名称、股票名称
@@ -189,7 +207,7 @@ def formarStockMarketData(pMarketDataForTrade, chSymbol):
 	pStandard["dLow"]		= pMarketDataForTrade["nLow"]				#今日最低
 	return pStandard
 #转换期货行情数据
-def formarFutureMarketData(pFutureMarketData, chSymbol):
+def formatFutureMarketData(pFutureMarketData, chSymbol):
 	pStandard = copy.copy(StandardMarketData)
 	pStandard["stockCode"]	= pFutureMarketData["chSecurityCode"]		#合约代码、股票代码、指数代码
 	pStandard["stockName"]	= chSymbol									#合约名称、股票名称
@@ -212,7 +230,7 @@ def formarFutureMarketData(pFutureMarketData, chSymbol):
 	pStandard["dLow"]		= pFutureMarketData["nLow"]					#今日最低
 	return pStandard
 #转换指数行情数据
-def formarIndexMarketData(pIndexMarketData, chSymbol):
+def formatIndexMarketData(pIndexMarketData, chSymbol):
 	pStandard = copy.copy(StandardMarketData)
 	pStandard["stockCode"]	= pIndexMarketData["chSecurityCode"]		#合约代码、股票代码、指数代码
 	pStandard["stockName"]	= chSymbol									#合约名称、股票名称
@@ -227,4 +245,28 @@ def formarIndexMarketData(pIndexMarketData, chSymbol):
 	pStandard["dOpen"]		= pIndexMarketData["nOpenIndex"]			#今日开盘
 	pStandard["dHigh"]		= pIndexMarketData["nHighIndex"]			#今日最高
 	pStandard["dLow"]		= pIndexMarketData["nLowIndex"]				#今日最低
+	return pStandard
+#转换逐笔成绩数据
+def formatTransaction(pTransaction, chSymbol):
+	pStandard = copy.copy(StandardTransaction)
+	pStandard["stockCode"]	= pTransaction["chSecurityCode"]		#合约代码、股票代码、指数代码
+	pStandard["stockName"]	= chSymbol								#合约名称、股票名称
+	dateTimeStr = "%s %s" %(str(pTransaction["nDate"]), pTransaction["nTime"].strftime("%H:%M:%S.%f"))
+	pStandard["dateTime"]	= datetime.datetime.strptime(dateTimeStr,"%Y-%m-%d %H:%M:%S.%f")
+	pStandard["index"]		= pTransaction["nIndex"]				#成交编号
+	pStandard["price"]		= pTransaction["nPrice"]				#成交价格
+	pStandard["vol"]		= pTransaction["nVolume"]				#成交数量
+	return pStandard
+#转换买一队列
+def formatOrderQueue(pOrderQueue, chSymbol):
+	pStandard = copy.copy(StandardOrderQueue)
+	pStandard["stockCode"]	= pOrderQueue["chSecurityCode"]		#合约代码、股票代码、指数代码
+	pStandard["stockName"]	= chSymbol								#合约名称、股票名称
+	dateTimeStr = "%s %s" %(str(pOrderQueue["nDate"]), pOrderQueue["nTime"].strftime("%H:%M:%S.%f"))
+	pStandard["dateTime"]	= datetime.datetime.strptime(dateTimeStr,"%Y-%m-%d %H:%M:%S.%f")
+	pStandard["side"]		= pOrderQueue["nSide"]				#买卖方向（B：bid，S：Ask）
+	pStandard["price"]		= pOrderQueue["nPrice"]				#成交价格
+	pStandard["orders"]		= pOrderQueue["nOrders"]			#订单数量
+	pStandard["ABItems"]	= pOrderQueue["nABItems"]			#明细个数
+	pStandard["ABVolume"]	= pOrderQueue["nABVolume"]			#订单明细
 	return pStandard

@@ -15,7 +15,7 @@ def DecompressTransactionData(p, nItems):
 	nPreTime = 0
 	nPreIndex = 0
 	nPrePrice = 0
-	for i in range(nItems):
+	for i in xrange(nItems):
 		#成交时间
 		nSize = nSize + api.decompressData(ctypes.addressof(iData), ctypes.c_char_p(p[nSize:]))
 		pTransactions[i]["nTime"] = nPreTime + iData.value 
@@ -40,7 +40,7 @@ def DecompressOrderQueueData(p, nItems):
 	pQueues, pIdnums = dataStruct.getOrderQueue(nItems)
 	nSize = 0
 	iData = ctypes.c_longlong(0)
-	for i in range(nItems):
+	for i in xrange(nItems):
 		#本日编号
 		nSize = nSize + api.decompressData(ctypes.addressof(iData), ctypes.c_char_p(p[nSize:]))
 		pIdnums[i] = iData.value
@@ -61,7 +61,7 @@ def DecompressOrderQueueData(p, nItems):
 		pQueues[i]["nABItems"] = int(iData.value)
 		#订单数量
 		nABVolume = []
-		for k in range(pQueues[i]["nABItems"]):
+		for k in xrange(pQueues[i]["nABItems"]):
 			nSize = nSize + api.decompressData(ctypes.addressof(iData), ctypes.c_char_p(p[nSize:]))
 			nABVolume.append(int(round(iData.value, -2)/100))
 		pQueues[i]["nABVolume"] = nABVolume
@@ -99,7 +99,7 @@ def DecompressMarketData(p):
 	nPrice = pMarketData["nMatch"]
 	if not nPrice:
 		nPrice = pMarketData["nPreClose"]
-	for i in range(10):
+	for i in xrange(10):
 		nSize = nSize + api.decompressData(ctypes.addressof(iData), ctypes.c_char_p(p[nSize:]))
 		pMarketData["nBidPrice"][i] = nPrice - round(float(iData.value)/10000,2)
 		nPrice = pMarketData["nBidPrice"][i]
@@ -107,16 +107,16 @@ def DecompressMarketData(p):
 	nPrice = pMarketData["nMatch"]
 	if not nPrice:
 		nPrice = pMarketData["nPreClose"]
-	for i in range(10):
+	for i in xrange(10):
 		nSize = nSize + api.decompressData(ctypes.addressof(iData), ctypes.c_char_p(p[nSize:]))
 		pMarketData["nAskPrice"][i] = nPrice - round(float(iData.value)/10000,2)
 		nPrice = pMarketData["nAskPrice"][i]
 	#竞买量
-	for i in range(10):
+	for i in xrange(10):
 		nSize = nSize + api.decompressData(ctypes.addressof(iData), ctypes.c_char_p(p[nSize:]))
 		pMarketData["nBidVol"][i] = int(round(iData.value,-2)/100)
 	#竞卖量
-	for i in range(10):
+	for i in xrange(10):
 		nSize = nSize + api.decompressData(ctypes.addressof(iData), ctypes.c_char_p(p[nSize:]))
 		pMarketData["nAskVol"][i] = int(round(iData.value,-2)/100)
 	#成交笔数
@@ -221,7 +221,7 @@ def DecompressMarketData_Futures(p):
 	nPrice = pMarketData["nMatch"]
 	if not nPrice:
 		nPrice = pMarketData["nPreClose"]
-	for i in range(5):
+	for i in xrange(5):
 		nSize = nSize + api.decompressData(ctypes.addressof(iData), ctypes.c_char_p(p[nSize:]))
 		pMarketData["nBidPrice"][i] = nPrice - round(float(iData.value)/10000,2)
 		pMarketData["nBidPrice"][i] = round(pMarketData["nBidPrice"][i], 2)
@@ -230,17 +230,17 @@ def DecompressMarketData_Futures(p):
 	nPrice = pMarketData["nMatch"]
 	if not nPrice:
 		nPrice = pMarketData["nPreClose"]
-	for i in range(5):
+	for i in xrange(5):
 		nSize = nSize + api.decompressData(ctypes.addressof(iData), ctypes.c_char_p(p[nSize:]))
 		pMarketData["nAskPrice"][i] = nPrice - round(float(iData.value)/10000,2)
 		pMarketData["nAskPrice"][i] = round(pMarketData["nBidPrice"][i], 2)
 		nPrice = pMarketData["nAskPrice"][i]
 	#竞买量
-	for i in range(5):
+	for i in xrange(5):
 		nSize = nSize + api.decompressData(ctypes.addressof(iData), ctypes.c_char_p(p[nSize:]))
 		pMarketData["nBidVol"][i] = int(iData.value)
 	#竞卖量
-	for i in range(5):
+	for i in xrange(5):
 		nSize = nSize + api.decompressData(ctypes.addressof(iData), ctypes.c_char_p(p[nSize:]))
 		pMarketData["nAskVol"][i] = int(iData.value)
 	return nSize, pMarketData
